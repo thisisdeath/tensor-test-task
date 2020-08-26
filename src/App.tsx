@@ -4,6 +4,10 @@ import Editor from './components/Editor';
 import List, { IItem } from './components/List';
 
 function App() {
+  if (localStorage.getItem('items') === '') {
+    localStorage.setItem('items', '[]')
+  }
+  
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [disabled, setDisable] = useState(true);
@@ -12,10 +16,10 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState([...JSON.parse(localStorage.getItem('items')!)]);
   const [sortMethod, setSortMethod] = useState('убыванию даты');
-  
+
   const setActiveItem = (id: string, newItem?: IItem) => {
     setSelectedItem(id);
-    let item = items.find((item) => item.id === id) || newItem || { title: '', body: '' };
+    let item = items.find(item => item.id === id) || newItem || { title: '', body: '' };
     setTitle(item.title);
     setBody(item.body);
     setDisable(true);
@@ -45,7 +49,7 @@ function App() {
   }
 
   const addNewNote = () => {
-    let id = `f${(~~(Math.random()*1e8)).toString(16)}`;
+    let id = `f${(~~(Math.random() * 1e8)).toString(16)}`;
     setItems([{ id, title: 'Новая заметка', body: 'Текст заметки' }, ...items]);
     setActiveItem(id, { id, title: '', body: '' });
     setDisable(false);
@@ -57,7 +61,7 @@ function App() {
   }
 
   const removeItem = (id: string) => {
-    let newItems = (items.filter(item =>
+    let newItems = (items.filter((item: IItem) =>
       item.id !== id
     ))
     setItems(newItems)

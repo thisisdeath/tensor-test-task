@@ -18,8 +18,8 @@ export default class Editor extends React.Component<IProps> {
         return (
             <div className='Editor'>
                 <div className='Editor__header'>
-                    <button className='Editor__button' onClick={this.props.disabledChangedCallback} hidden={!this.props.disabled}>Редактировать</button>
-                    <button className='Editor__button' onClick={() => this.props.removeItem(this.props.id)}>Удалить</button>
+                    <button className='Editor__button__edit' onClick={this.props.disabledChangedCallback} hidden={!this.props.disabled}>Редактировать</button>
+                    <button className='Editor__button__remove' onClick={() => this.props.removeItem(this.props.id)}>Удалить</button>
                 </div>
                 <input className='Editor__title' value={this.props.title} onChange={this.handleTitleChange} disabled={this.props.disabled} placeholder='Название' /><br />
                 <textarea className='Editor__body' value={this.props.body} onChange={this.handleBodyChange} disabled={this.props.disabled} placeholder='Текст' />
