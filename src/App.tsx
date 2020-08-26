@@ -12,9 +12,9 @@ function App() {
   const [body, setBody] = useState('');
   const [disabled, setDisable] = useState(true);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [items, setItems] = useState([...JSON.parse(localStorage.getItem('items')!)]);
+  const [items, setItems] = useState(...JSON.parse(localStorage.getItem('items')!) || []);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredItems, setFilteredItems] = useState([...JSON.parse(localStorage.getItem('items')!)]);
+  const [filteredItems, setFilteredItems] = useState(...JSON.parse(localStorage.getItem('items')!) || []);
   const [sortMethod, setSortMethod] = useState('убыванию даты');
 
   const setActiveItem = (id: string, newItem?: IItem) => {
