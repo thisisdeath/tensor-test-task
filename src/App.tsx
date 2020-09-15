@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import './App.css';
 import Editor from './components/Editor';
 import List, { IItem } from './components/List';
@@ -8,7 +8,7 @@ function App() {
   if (localStorage.getItem('items') === null || localStorage.getItem('items') === '') {
     localStorage.setItem('items', '[]')
   }
-  
+
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [disabled, setDisable] = useState(true);
@@ -24,7 +24,6 @@ function App() {
     setTitle(item.title);
     setBody(item.body);
     setDisable(true);
-    localStorage.setItem('items', JSON.stringify(items));
   }
 
   const setActiveTitle = (title: string) => {
@@ -36,6 +35,7 @@ function App() {
         return item
       }
     }))
+    setFilteredItems(items);
   }
 
   const setActiveBody = (body: string) => {
@@ -47,6 +47,7 @@ function App() {
         return item
       }
     }))
+    setFilteredItems(items);
   }
 
   const addNewNote = () => {
@@ -54,6 +55,7 @@ function App() {
     setItems([{ id, title: 'Новая заметка', body: 'Текст заметки' }, ...items]);
     setActiveItem(id, { id, title: '', body: '' });
     setDisable(false);
+    setFilteredItems(items);
     localStorage.setItem('items', JSON.stringify(items));
   }
 
@@ -68,7 +70,27 @@ function App() {
     setItems(newItems)
     setFilteredItems(newItems)
     setSelectedItem(null)
+    setFilteredItems(items);
     localStorage.setItem('items', JSON.stringify(newItems));
+  }
+
+  const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    setItems(filterItems(filteredItems, event.target.value))
+  }
+
+  const filterItems = (filteredItems: IItem[], searchQuery: string) => {
+    setSelectedItem(null);
+    return filteredItems.filter(item =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }
+
+  const handleSortMethodChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (sortMethod != event.target.value) {
+      setItems(items.reverse())
+      setSortMethod(event.target.value)
+    }
   }
 
   return (
@@ -80,7 +102,17 @@ function App() {
         <button className='App__addButton' onClick={addNewNote}> + </button>
       </header>
       <div className='App__body'>
-        <List className='App__list' items={items} setItems={setItems} selectedItem={selectedItem} selectedItemChangeCallback={setActiveItem} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems} setFilteredItems={setFilteredItems} sortMethod={sortMethod} setSortMethod={setSortMethod} removeItem={removeItem} setSelectedItem={setSelectedItem} />
+        <div className='App__action'>
+          <input onChange={handleSearchQueryChange} placeholder='Поиск...' />
+          <div>
+            <text>Сортировать по </text>
+            <select onChange={handleSortMethodChange}>
+              <option>убыванию даты</option>
+              <option>возрастанию даты</option>
+            </select>
+          </div>
+        </div>
+        <List className='App__list' items={items} setItems={setItems} selectedItem={selectedItem} selectedItemChangeCallback={setActiveItem} removeItem={removeItem} setSelectedItem={setSelectedItem} />
         {selectedItem && <Editor title={title} titleChangedCallback={setActiveTitle} body={body} bodyChangedCallback={setActiveBody} id={selectedItem} disabled={disabled} disabledChangedCallback={enableEditor} removeItem={removeItem} />}
       </div>
     </div>

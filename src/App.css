@@ -48,3 +48,13 @@ html, body, .App, #root  {
   height: 100%;
   border-right: 1px solid lightgray;
 }
+
+.App__action {
+  display: flex;
+  flex-direction: column;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 10px;
+  border-right: 1px solid lightgray;
+}
