@@ -98,6 +98,8 @@ class App extends React.Component<{}, IState> {
       items,
       displayItems: items
     });
+
+    saveChanges(items);
   }
 
   setActiveBody = (body: string) => {
@@ -114,12 +116,16 @@ class App extends React.Component<{}, IState> {
       items,
       displayItems: items
     });
+
+    saveChanges(items);
   }
 
   addNewNote = () => {
     const id = `f${(~~(Math.random() * 1e8)).toString(16)}`;
     const newDate = new Date();
     const items = [{ id, title: 'Новая заметка', body: 'Текст заметки', date: newDate }, ...this.state.items];
+
+    this.setActiveItem(id, { id, title: '', body: '', date: newDate });
 
     this.setState({
       items,
@@ -130,8 +136,6 @@ class App extends React.Component<{}, IState> {
     if (this.state.searchQuery) {
       this.handleSearchQueryChange('', items);
     }
-
-    this.setActiveItem(id, { id, title: '', body: '', date: newDate });
 
     saveChanges(items);
   }
