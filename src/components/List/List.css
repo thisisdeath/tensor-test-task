@@ -3,9 +3,20 @@
 }
 
 .List__item {
+    position: relative;
     padding: 10px 20px;
     cursor: pointer;
     height: 56px;
+    border: 1px solid;
+    margin-bottom: 10px;
+}
+
+.List__item:last-child {
+    margin-bottom: 0;
+}
+
+.List__item:hover {
+    background: #fde66c;
 }
 
 .List__item-selected {
@@ -37,17 +48,13 @@
 }
 
 .List__delete__item {
-    border: medium none;
-    background-image: none; 
-    background: transparent;
-    float: left;
-    background-color: transparent;
+    position: absolute;
+    display: none;
     width: 2em;
     height: 2em;
-    -webkit-text-fill-color: transparent;
-    outline: none;
+    right: 0;
 }
 
-.List__delete__item:hover {
-    -webkit-text-fill-color: black;
+.List__item:hover .List__delete__item {
+    display: block;
 }

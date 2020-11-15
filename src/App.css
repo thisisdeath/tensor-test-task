@@ -41,20 +41,52 @@ html, body, .App, #root  {
 .App__body {
   display: flex;
   flex-grow: 1;
+  min-height: 0px;
 }
 
 .App__list {
-  width: 25%;
-  height: 100%;
+  padding: 10px;
+}
+
+.App__sidebar {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  overflow-y: scroll;
   border-right: 1px solid lightgray;
+  width: 25%;
 }
 
 .App__action {
+  position: sticky;
+  top: 0;
+  background-color: #e2e2e2;
+  padding: 10px;
+  z-index: 1;
+}
+
+.App__searchbar {
+  border: none;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.App__sortbar {
   display: flex;
-  flex-direction: column;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  margin: 10px;
-  border-right: 1px solid lightgray;
+  align-items: baseline;
+}
+
+.App__select {
+  border: none;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  margin-left: 8px;
+  flex-grow: 1;
+}
+
+.App__editor {
+  flex-grow: 1;
 }

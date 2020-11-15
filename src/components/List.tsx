@@ -1,15 +1,15 @@
-import React, { ChangeEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import './List/List.css';
 
 export interface IItem {
     id: string;
     title: string;
     body: string;
+    date: Date;
 }
 
 interface IProps {
     items: IItem[];
-    setItems: (items: IItem[]) => void;
     selectedItem?: string | null;
     selectedItemChangeCallback?: (id: string) => void;
     className?: string;
@@ -17,27 +17,25 @@ interface IProps {
     setSelectedItem: (id: string | null) => void;
 }
 
-export default class List extends React.Component<IProps> {
+export default function List(props: IProps) {
+    return (
+        <ul className={`List ${props.className}`}>
+            {props.items.map(item =>
+                <li className={`List__item ${item.id === props.selectedItem ? 'List__item-selected' : ''}`} onClick={() => {
+                    props.selectedItemChangeCallback && props.selectedItemChangeCallback(item.id)
+                }}>
+                    <div className='List__element__header'>
+                        <div className='List__item__title'><b>{item.title}</b></div>
+                        <div className='List__delete__item' onClick={(event: MouseEvent) => {
+                            event.stopPropagation()
 
-    render() {
-        return (
-            <ul className={`List ${this.props.className}`}>
-                {this.props.items.map(item =>
-                    <li className={`List__item ${item.id === this.props.selectedItem ? 'List__item-selected' : ''}`} onClick={() => this.selectItem(item.id)}>
-                        <div className='List__element__header'>
-                            <div className='List__item__title'><b>{item.title}</b></div>
-                            <button className='List__delete__item' onClick={() => {
-                                this.props.setSelectedItem(null)
-                                this.props.removeItem(item.id)
-                            }}>X</button>
-                        </div>
-                        <div className='List__item__body'>{item.body}</div>
-                    </li>
-                )}
-            </ul>
-        )
-    }
-    selectItem(id: string) {
-        this.props.selectedItemChangeCallback && this.props.selectedItemChangeCallback(id);
-    }
+                            props.setSelectedItem(null)
+                            props.removeItem(item.id)
+                        }}>X</div>
+                    </div>
+                    <div className='List__item__body'>{item.body}</div>
+                </li>
+            )}
+        </ul>
+    )
 }

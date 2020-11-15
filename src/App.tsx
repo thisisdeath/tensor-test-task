@@ -3,120 +3,208 @@ import './App.css';
 import Editor from './components/Editor';
 import List, { IItem } from './components/List';
 
-function App() {
+type ISortMethod = 'убыванию даты' | 'возрастанию даты';
 
-  if (localStorage.getItem('items') === null || localStorage.getItem('items') === '') {
-    localStorage.setItem('items', '[]')
-  }
+interface IState {
+  title: string;
+  body: string;
+  disabled: boolean;
+  selectedItem: string | null;
+  items: IItem[];
+  searchQuery: string;
+  displayItems: IItem[];
+  sortMethod: ISortMethod;
+}
 
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [disabled, setDisable] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [items, setItems] = useState([...JSON.parse(localStorage.getItem('items')!)]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredItems, setFilteredItems] = useState([...JSON.parse(localStorage.getItem('items')!)]);
-  const [sortMethod, setSortMethod] = useState('убыванию даты');
+class App extends React.Component<{}, IState> {
+  constructor(props: object) {
+    super(props);
 
-  const setActiveItem = (id: string, newItem?: IItem) => {
-    setSelectedItem(id);
-    let item = items.find(item => item.id === id) || newItem || { title: '', body: '' };
-    setTitle(item.title);
-    setBody(item.body);
-    setDisable(true);
-  }
+    if (localStorage.getItem('items') === null || localStorage.getItem('items') === '') {
+      localStorage.setItem('items', '[]')
+    }
 
-  const setActiveTitle = (title: string) => {
-    setTitle(title);
-    setItems(items.map(item => {
-      if (item.id === selectedItem) {
-        return { id: item.id, title, body: item.body }
+    const items = [...JSON.parse(localStorage.getItem('items')!, (key, value) => {
+      if (key === 'date') {
+        return new Date(value);
       } else {
-        return item
+        return value;
       }
-    }))
-    setFilteredItems(items);
-  }
+    })];
 
-  const setActiveBody = (body: string) => {
-    setBody(body);
-    setItems(items.map(item => {
-      if (item.id === selectedItem) {
-        return { id: item.id, title: item.title, body }
-      } else {
-        return item
-      }
-    }))
-    setFilteredItems(items);
-  }
-
-  const addNewNote = () => {
-    let id = `f${(~~(Math.random() * 1e8)).toString(16)}`;
-    setItems([{ id, title: 'Новая заметка', body: 'Текст заметки' }, ...items]);
-    setActiveItem(id, { id, title: '', body: '' });
-    setDisable(false);
-    setFilteredItems(items);
-    localStorage.setItem('items', JSON.stringify(items));
-  }
-
-  const enableEditor = () => {
-    setDisable(false);
-  }
-
-  const removeItem = (id: string) => {
-    let newItems = (items.filter((item: IItem) =>
-      item.id !== id
-    ))
-    setItems(newItems)
-    setFilteredItems(newItems)
-    setSelectedItem(null)
-    setFilteredItems(items);
-    localStorage.setItem('items', JSON.stringify(newItems));
-  }
-
-  const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-    setItems(filterItems(filteredItems, event.target.value))
-  }
-
-  const filterItems = (filteredItems: IItem[], searchQuery: string) => {
-    setSelectedItem(null);
-    return filteredItems.filter(item =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }
-
-  const handleSortMethodChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    if (sortMethod != event.target.value) {
-      setItems(items.reverse())
-      setSortMethod(event.target.value)
+    this.state = {
+      title: '',
+      body: '',
+      disabled: true,
+      selectedItem: null,
+      items,
+      searchQuery: '',
+      displayItems: items,
+      sortMethod: 'убыванию даты'
     }
   }
 
-  return (
-    <div className='App'>
-      <header className='App__header'>
-        <h1 className='App__heading'>
-          Заметки
-        </h1>
-        <button className='App__addButton' onClick={addNewNote}> + </button>
-      </header>
-      <div className='App__body'>
-        <div className='App__action'>
-          <input onChange={handleSearchQueryChange} placeholder='Поиск...' />
-          <div>
-            <text>Сортировать по </text>
-            <select onChange={handleSortMethodChange}>
-              <option>убыванию даты</option>
-              <option>возрастанию даты</option>
-            </select>
+  render() {
+    return (
+      <div className='App'>
+        <header className='App__header'>
+          <h1 className='App__heading'>
+            Заметки
+          </h1>
+          <button className='App__addButton' onClick={this.addNewNote}> + </button>
+        </header>
+        <div className='App__body'>
+          <div className='App__sidebar'>
+            <div className='App__action'>
+              <input className='App__searchbar' onChange={this.handleSearchQueryChangeCallback} placeholder='Поиск...' value={this.state.searchQuery}/>
+              <div className='App__sortbar'>
+                Сортировать по
+                <select className='App__select' onChange={this.handleSortMethodChangeCallback}>
+                  <option>убыванию даты</option>
+                  <option>возрастанию даты</option>
+                </select>
+              </div>
+            </div>
+            <List className='App__list' items={this.state.displayItems} selectedItem={this.state.selectedItem} selectedItemChangeCallback={this.setActiveItem} removeItem={this.removeItem} setSelectedItem={(id) => this.setState({selectedItem: id})} />
           </div>
+          {this.state.selectedItem && <Editor className='App__editor' title={this.state.title} titleChangedCallback={this.setActiveTitle} body={this.state.body} bodyChangedCallback={this.setActiveBody} disabled={this.state.disabled} disabledChangedCallback={this.enableEditor} removeButtonClickCallback={this.removeButtonClickCallback} />}
         </div>
-        <List className='App__list' items={items} setItems={setItems} selectedItem={selectedItem} selectedItemChangeCallback={setActiveItem} removeItem={removeItem} setSelectedItem={setSelectedItem} />
-        {selectedItem && <Editor title={title} titleChangedCallback={setActiveTitle} body={body} bodyChangedCallback={setActiveBody} id={selectedItem} disabled={disabled} disabledChangedCallback={enableEditor} removeItem={removeItem} />}
       </div>
-    </div>
-  )
+    )
+  }
+
+  setActiveItem = (id: string, newItem?: IItem) => {
+    const item = this.state.items.find(item => item.id === id) || newItem || { title: '', body: '' };
+
+    this.setState({
+      selectedItem: id,
+      title: item.title,
+      body: item.body,
+      disabled: true
+    });
+  }
+
+  setActiveTitle = (title: string) => {
+    const items = this.state.items.map(item => {
+      if (item.id === this.state.selectedItem) {
+        return { id: item.id, title, body: item.body, date: item.date }
+      } else {
+        return item
+      }
+    });
+
+    this.setState({
+      title,
+      items,
+      displayItems: items
+    });
+  }
+
+  setActiveBody = (body: string) => {
+    const items = this.state.items.map(item => {
+      if (item.id === this.state.selectedItem) {
+        return { id: item.id, title: item.title, body, date: item.date }
+      } else {
+        return item
+      }
+    });
+
+    this.setState({
+      body,
+      items,
+      displayItems: items
+    });
+  }
+
+  addNewNote = () => {
+    const id = `f${(~~(Math.random() * 1e8)).toString(16)}`;
+    const newDate = new Date();
+    const items = [{ id, title: 'Новая заметка', body: 'Текст заметки', date: newDate }, ...this.state.items];
+
+    this.setState({
+      items,
+      disabled: false,
+      displayItems: [...items]
+    });
+
+    if (this.state.searchQuery) {
+      this.handleSearchQueryChange('', items);
+    }
+
+    this.setActiveItem(id, { id, title: '', body: '', date: newDate });
+
+    saveChanges(items);
+  }
+
+  enableEditor = () => {
+    this.setState({
+      disabled: false
+    });
+  }
+
+  removeButtonClickCallback = () => {
+    this.removeItem(this.state.selectedItem as string);
+  }
+
+  removeItem = (id: string) => {
+    const newItems = (this.state.items.filter((item: IItem) =>
+      item.id !== id
+    ));
+
+    this.setState({
+      items: newItems
+    });
+
+    const displayItems = this.handleSearchQueryChange(this.state.searchQuery, newItems);
+    this.handleSortMethodChange(this.state.sortMethod, displayItems);
+
+    saveChanges(newItems);
+  }
+
+  handleSearchQueryChangeCallback = (event: ChangeEvent<HTMLInputElement>) => {
+    this.handleSearchQueryChange(event.target.value, this.state.items);
+  }
+
+  handleSearchQueryChange = (searchQuery: string, newItems: IItem[]) => {
+    const items = App.filterItems(newItems, searchQuery);
+
+    this.setState({
+      searchQuery,
+      displayItems: items,
+      selectedItem: null
+    });
+
+    return items;
+  }
+
+  static filterItems(filteredItems: IItem[], searchQuery: string) {
+    return filteredItems.filter(item =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  handleSortMethodChangeCallback = (event: ChangeEvent<HTMLSelectElement>) => {
+    this.handleSortMethodChange(event.target.value as ISortMethod, this.state.displayItems);
+  }
+
+  handleSortMethodChange = (sortMethod: ISortMethod, newItems: IItem[]) => {
+    if (this.state.sortMethod != sortMethod) {
+      if (sortMethod === 'убыванию даты') {
+        newItems.sort((a, b) => Number(b.date) - Number(a.date));
+      } else {
+        newItems.sort((a, b) => Number(a.date) - Number(b.date));
+      }
+
+      this.setState({
+        displayItems: newItems.sort(),
+        sortMethod 
+      });
+    }
+  }
+}
+
+function saveChanges(items: IItem[]) {
+  localStorage.setItem('items', JSON.stringify(items));
 }
 
 export default App;
