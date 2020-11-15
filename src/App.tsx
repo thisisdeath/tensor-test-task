@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import './App.css';
 import Editor from './components/Editor';
 import List, { IItem } from './components/List';
@@ -192,7 +192,7 @@ class App extends React.Component<{}, IState> {
   }
 
   handleSortMethodChange = (sortMethod: ISortMethod, newItems: IItem[]) => {
-    if (this.state.sortMethod != sortMethod) {
+    if (this.state.sortMethod !== sortMethod) {
       if (sortMethod === 'убыванию даты') {
         newItems.sort((a, b) => Number(b.date) - Number(a.date));
       } else {
